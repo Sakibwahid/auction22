@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:wght@400;700&family=Space+Grotesk:wght@300;400;500;700&family=DM+Sans:wght@300;400;500;700&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;400;700&family=Exo:wght@300;400;700&family=Quantico:wght@400;700&family=Montserrat:wght@300;400;700&family=Manrope:wght@300;400;700&family=Poppins:wght@300;400;700&family=Urbanist:wght@300;400;700&family=Cinzel:wght@400;700&family=Abril+Fatface&family=Sora:ital,wght@0,300;0,400;0,700;1,300;1,500;1,700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* primary */
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-900: #1e3a8a;
+
+  /* fifa */
+  --color-fifa-bg: #0B1020;
+  --color-fifa-surface: #111A2D;
+  --color-fifa-card: #17233B;
+  --color-fifa-elevated: #1D2B45;
+  --color-fifa-border: #2B3B5A;
+
+  --color-fifa-accent: #B7FF2A;
+  --color-fifa-accent-hover: #D2FF57;
+  --color-fifa-accent-active: #95E600;
+
+  --color-fifa-text: #FFFFFF;
+  --color-fifa-text-secondary: #A9B4C8;
+  --color-fifa-text-muted: #6F7D99;
+
+  --color-fifa-success: #4ADE80;
+  --color-fifa-warning: #FACC15;
+  --color-fifa-danger: #EF4444;
+  --color-fifa-info: #38BDF8;
+
+  /* fonts */
+  --font-playfair: "Playfair Display", serif;
+  --font-lora: "Lora", serif;
+  --font-inter: "Inter", sans-serif;
+
+  --font-orbitron: "Orbitron", sans-serif;
+  --font-rajdhani: "Rajdhani", sans-serif;
+  --font-exo: "Exo", sans-serif;
+  --font-quantico: "Quantico", sans-serif;
+
+  --font-montserrat: "Montserrat", sans-serif;
+  --font-manrope: "Manrope", sans-serif;
+  --font-poppins: "Poppins", sans-serif;
+  --font-urbanist: "Urbanist", sans-serif;
+
+  --font-cinzel: "Cinzel", serif;
+  --font-abril: "Abril Fatface", serif;
+
+  --font-sora: "Sora", sans-serif;
+  --font-spaceGrotesk: "Space Grotesk", sans-serif;
+  --font-dmSans: "DM Sans", sans-serif;
+}
+
