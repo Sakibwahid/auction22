@@ -105,7 +105,7 @@ const Signup = () => {
               <option value="Wolverhampton Wanderers F.C.">Wolverhampton Wanderers F.C.</option>
               <option value="Liverpool FC">Liverpool FC</option>
               <option value="Manchester United F.C.">Manchester United F.C.</option>
-              <option value="Chelsea F.C.">Chelsea F.C.</option>
+              <option value="Paris Saint-Germain F.C.">Paris Saint-Germain F.C.</option>
               <option value="Arsenal F.C.">Arsenal F.C.</option>
               <option value="Real Madrid C.F.">Real Madrid C.F.</option>
             </select>
