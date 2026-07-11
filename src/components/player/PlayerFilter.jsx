@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { collection, query, getDocs, limit } from "firebase/firestore";
 import { db } from "../../lib/firebase/config";
 import { Button } from "../ui/Button";
@@ -28,6 +28,8 @@ const PlayerFilter = () => {
   const [allPlayers, setAllPlayers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sortHighToLow, setSortHighToLow] = useState(true);
+
+  const listScrollRef = useRef(null);
 
   useEffect(() => {
     const loadPlayers = async () => {
@@ -148,11 +150,15 @@ const PlayerFilter = () => {
         </div>
       </div>
 
-      <div className="flex-1 w-full overflow-y-scroll pr-1">
+      <div
+        ref={listScrollRef}
+        className="flex-1 w-full overflow-y-scroll pr-1 max-h-[80vh]"
+      >
         <PlayerList
           players={filteredPlayers}
           loading={loading}
           onPlayerClick={openPlayerDetails}
+          scrollRef={listScrollRef}
         />
       </div>
 

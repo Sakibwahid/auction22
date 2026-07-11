@@ -26,6 +26,8 @@ const PlayerCardDemo = ({ player, onClick }) => {
                 src={`/player_photos/${player.ID}.png`}
                 alt={player.Name}
                 className="w-full h-full object-cover object-top"
+                loading="lazy"
+                decoding="async"
                 onError={() => setImgFailed(true)}
               />
             ) : (
@@ -90,4 +92,4 @@ const Stat = ({ label, value }) => (
   </div>
 );
 
-export default PlayerCardDemo;
+export default React.memo(PlayerCardDemo);
