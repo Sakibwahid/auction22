@@ -37,10 +37,6 @@ export const AuthProvider = ({ children }) => {
         try {
           // USER LOGGED IN
           if (firebaseUser) {
-            if (!mounted) return;
-
-            setUser(firebaseUser);
-
             const cacheKey = `userData_${firebaseUser.uid}`;
 
             // Check local cache first
@@ -48,10 +44,15 @@ export const AuthProvider = ({ children }) => {
               localStorage.getItem(cacheKey);
 
             if (cachedUserData) {
-              setUserData(JSON.parse(cachedUserData));
+              // Use cached data instantly — skip the spinner.
+              if (mounted) {
+                setUser(firebaseUser);
+                setUserData(JSON.parse(cachedUserData));
+                setLoading(false);
+              }
             }
 
-            // Fetch latest user data from Firestore
+            // Refresh from Firestore in the background (silent if cached)
             const result = await getUserData(
               firebaseUser.uid
             );
@@ -69,6 +70,13 @@ export const AuthProvider = ({ children }) => {
                 JSON.stringify(result.data)
               );
             }
+
+            // If there was no cache, we had to wait for Firestore
+            // before the user could be considered "loaded".
+            if (mounted && !cachedUserData) {
+              setUser(firebaseUser);
+              setLoading(false);
+            }
           }
 
           // USER LOGGED OUT
@@ -79,7 +87,10 @@ export const AuthProvider = ({ children }) => {
             setUserData(null);
 
             // Clear cache
-            localStorage.removeItem(cacheKey);
+            const uid = auth.currentUser?.uid;
+            if (uid) {
+              localStorage.removeItem(`userData_${uid}`);
+            }
           }
         } catch (error) {
           console.error(
