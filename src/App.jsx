@@ -30,6 +30,7 @@ const PlayerTableAssign = lazy(() =>
 );
 const DisplaySquad = lazy(() => import("./components/Squads/DisplaySquad"));
 const SquadBuilder = lazy(() => import("./components/Squads/SquadBuilder"));
+const About = lazy(() => import("./pages/About"));
 
 const withRole = (role, Element) => (
   <ProtectedRoute role={role}>
@@ -98,6 +99,7 @@ function App() {
                     path="/user/buildsquad"
                     element={withRole(["user", "admin"], SquadBuilder)}
                   />
+                  <Route path="/about" element={<About />} />
                 </Routes>
               </Suspense>
             </div>
