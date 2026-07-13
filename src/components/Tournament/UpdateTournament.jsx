@@ -21,7 +21,7 @@ const TEAMS = [
   "Wolverhampton Wanderers F.C.",
   "FC Bayern Munich",
   "Manchester City F.C.",
-  "Manchester United F.C.",
+  "Paris Saint-Germain F.C.",
   "Liverpool F.C.",
 ];
 
@@ -181,7 +181,7 @@ const UpdateTournament = () => {
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* LEFT */}
-        <div className="lg:col-span-1 rounded-2xl backdrop-blur-md bg-white/10 border border-white/20 shadow-lg p-5 md:p-6">
+        <div className="z-5 lg:col-span-1 rounded-2xl backdrop-blur-md bg-white/10 border border-white/20 shadow-lg p-5 md:p-6">
 
           <Text className="text-2xl font-semibold mb-5 text-center">
             Update Tournament

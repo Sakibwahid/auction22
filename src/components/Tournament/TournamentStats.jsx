@@ -8,13 +8,13 @@ import { Text } from "../ui/Text";
 import Loadin from "../ui/loadin";
 import Reveal from "../ui/Reveal";
 import CountUp from "../ui/CountUp";
-import { Crown, Trophy, Ban } from "lucide-react";
+import { Crown, Trophy, Medal, Percent } from "lucide-react";
 
 const TEAM_SHORT_NAMES = {
   "Wolverhampton Wanderers F.C.": "Wolves",
   "FC Bayern Munich": "Bayern",
   "Manchester City F.C.": "Man City",
-  "Manchester United F.C.": "Man United",
+  "Paris Saint-Germain F.C.": "PSG",
   "Liverpool F.C.": "Liverpool",
 };
 
@@ -117,19 +117,63 @@ const TournamentStats = ({ selectedSeason = "S3" }) => {
     const mostZero = Math.max(...teams.map((t) => t.zeroCounts || 0), 0);
     const maxPoints = Math.max(...teams.map((t) => t.totalPoints || 0), 1);
     const totalTournaments = Math.round(totalPoints / 6);
-    const firstTeam = count
+    const finalsWonTeam = count
       ? teams.reduce(
           (b, t) => ((t.firstCount || 0) > (b.firstCount || 0) ? t : b),
           teams[0]
         ).name
       : null;
-    const zeroTeam = count
+    const finalsPlayedTeam = count
       ? teams.reduce(
-          (b, t) => ((t.zeroCounts || 0) > (b.zeroCounts || 0) ? t : b),
+          (b, t) =>
+            (t.firstCount || 0) + (t.secondCounts || 0) >
+            (b.firstCount || 0) + (b.secondCounts || 0)
+              ? t
+              : b,
           teams[0]
         ).name
       : null;
-    return { count, totalPoints, mostFirst, mostZero, maxPoints, totalTournaments, firstTeam, zeroTeam };
+    const bestRateTeam = count
+      ? teams.reduce(
+          (b, t) => {
+            const ba = (b.firstCount || 0) + (b.secondCounts || 0);
+            const bb = (t.firstCount || 0) + (t.secondCounts || 0);
+            const rb = ba ? (b.firstCount || 0) / ba : -1;
+            const rt = bb ? (t.firstCount || 0) / bb : -1;
+            return rt > rb ? t : b;
+          },
+          teams[0]
+        ).name
+      : null;
+    const bestRate = (() => {
+      if (!bestRateTeam) return 0;
+      const t = teams.find((x) => x.name === bestRateTeam);
+      const denom = (t.firstCount || 0) + (t.secondCounts || 0);
+      return denom ? Math.round(((t.firstCount || 0) / denom) * 100) : 0;
+    })();
+    const finalsWon = count
+      ? Math.max(...teams.map((t) => t.firstCount || 0), 0)
+      : 0;
+    const finalsPlayed = count
+      ? Math.max(
+          ...teams.map((t) => (t.firstCount || 0) + (t.secondCounts || 0)),
+          0
+        )
+      : 0;
+    return {
+      count,
+      totalPoints,
+      mostFirst,
+      mostZero,
+      maxPoints,
+      totalTournaments,
+      finalsWonTeam,
+      finalsPlayedTeam,
+      bestRateTeam,
+      bestRate,
+      finalsWon,
+      finalsPlayed,
+    };
   }, [teams]);
 
   if (loading) {
@@ -162,40 +206,56 @@ const TournamentStats = ({ selectedSeason = "S3" }) => {
         </Text>
       </Reveal>
 
-      {/* SUMMARY — three horizontal cards */}
-      <div className="grid grid-cols-3 items-center justify-center sm:grid-cols-3 gap-3 mt-7">
+      {/* SUMMARY — full-width horizontal cards */}
+      <div className="flex flex-col gap-3 mt-7">
         {[
           {
-            label: "Most First Place",
-            logoTeam: stats.firstTeam,
-            icon: Crown,
-          },
-          {
-            label: "Total Tournaments",
-            end: stats.totalTournaments,
+            label: "Total Tournaments Played",
+            value: stats.totalTournaments,
             icon: Trophy,
           },
           {
-            label: "Most Zeros gained",
-            logoTeam: stats.zeroTeam,
-            icon: Ban,
+            label: "Most Finals Won",
+            value: stats.finalsWon,
+            team: stats.finalsWonTeam,
+            icon: Crown,
+          },
+          {
+            label: "Most Finals Played",
+            value: stats.finalsPlayed,
+            team: stats.finalsPlayedTeam,
+            icon: Medal,
+          },
+          {
+            label: "Final Win Rate",
+            value: stats.bestRate,
+            suffix: "%",
+            team: stats.bestRateTeam,
+            icon: Percent,
           },
         ].map((s, i) => (
-          <Reveal key={s.label} delay={i * 90}>
-            <div className="h-40 text-center flex flex-col justify-center items-center bg-fifa-surface/60 border border-fifa-border rounded-2xl p-4">
-              <div className="w-10 h-10 rounded-lg bg-fifa-card border border-fifa-border flex items-center justify-center mb-4">
-                <s.icon size={18} className="text-fifa-accent" />
+          <Reveal key={s.label} delay={i * 80}>
+            <div className="h-20 flex flex-row items-center gap-3 bg-fifa-surface/60 border border-fifa-border rounded-2xl px-4">
+              <div className="w-9 h-9 rounded-lg bg-fifa-card border border-fifa-border flex items-center justify-center shrink-0">
+                <s.icon size={16} className="text-fifa-accent" />
               </div>
-              {s.logoTeam ? (
-                <ClubLogo name={s.logoTeam} size="w-14 h-14" />
-              ) : (
-                <Text className="font-[orbitron] font-bold text-white text-3xl md:text-4xl">
-                  <CountUp end={s.end} />
+              <div className="min-w-full grid grid-cols-2 gap-2 justify-between items-center">
+
+                <div className="flex flex-col gap-0.5">
+                {s.team && (
+                  <Text className="font-[rajdhani] font-semibold text-fifa-text text-[18px] mt-0.5 truncate">
+                    {teamShort(s.team)}
+                  </Text>
+                )}
+                <Text className="font-inter text-[10px] uppercase tracking-wider text-fifa-text-muted mt-1 block">
+                  {s.label}
                 </Text>
-              )}
-              <Text className="font-inter text-[10px] uppercase tracking-wider text-fifa-text-muted mt-2 block">
-                {s.label}
-              </Text>
+                </div>
+
+                <Text className="text-center font-[orbitron] font-bold text-fifa-accent text-2xl">
+                  <CountUp end={s.value} suffix={s.suffix || ""} />
+                </Text>
+              </div>
             </div>
           </Reveal>
         ))}
@@ -222,20 +282,20 @@ const TournamentStats = ({ selectedSeason = "S3" }) => {
                   <ClubLogo name={team.name} />
 
                   <div className="flex-1 min-w-0">
-                    <Text className="font-[rajdhani] font-bold text-white text-lg md:text-xl truncate">
+                    <Text className="font-[rajdhani] font-bold text-white text-[24px] md:text-xl truncate">
                       {teamShort(team.name)}
                     </Text>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-xs uppercase tracking-wider text-fifa-text-muted">
-                      <span>
+                    <div className="flex gap-x-4 gap-y-1 text-xs uppercase tracking-wider text-fifa-text-muted">
+                      <span className="text-center">
                         1st <b className="text-white">{team.firstCount || 0}</b>
                       </span>
-                      <span>
+                      <span className="text-center">
                         2nd <b className="text-white">{team.secondCounts || 0}</b>
                       </span>
-                      <span>
+                      <span className="text-center">
                         3rd <b className="text-white">{team.thirdCount || 0}</b>
                       </span>
-                      <span>
+                      <span className="text-center">
                         0 <b className="text-white">{team.zeroCounts || 0}</b>
                       </span>
                     </div>
