@@ -20,83 +20,8 @@ import {
   Search,
   Flag,
 } from "lucide-react";
-
-/* ─────────────────────────────────────────
-   Reveal — fade + slide up on scroll into view
-───────────────────────────────────────── */
-function Reveal({ children, delay = 0, className = "" }) {
-  const ref = useRef(null);
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setShow(true);
-          obs.unobserve(el);
-        }
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -8% 0px" },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-[700ms] ease-out ${
-        show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-      } ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────
-   CountUp — animated number when scrolled in
-───────────────────────────────────────── */
-function CountUp({ end, duration = 1400, suffix = "", prefix = "" }) {
-  const ref = useRef(null);
-  const [val, setVal] = useState(0);
-  const [started, setStarted] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !started) {
-          setStarted(true);
-          const start = performance.now();
-          const tick = (now) => {
-            const p = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - p, 3);
-            setVal(Math.round(eased * end));
-            if (p < 1) requestAnimationFrame(tick);
-          };
-          requestAnimationFrame(tick);
-          obs.unobserve(el);
-        }
-      },
-      { threshold: 0.4 },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [end, duration, started]);
-
-  return (
-    <span ref={ref}>
-      {prefix}
-      {val}
-      {suffix}
-    </span>
-  );
-}
+import Reveal from "../components/ui/Reveal";
+import CountUp from "../components/ui/CountUp";
 
 /* ─────────────────────────────────────────
    Small section eyebrow label (matches Home)
