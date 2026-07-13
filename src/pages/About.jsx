@@ -462,17 +462,17 @@ const About = () => {
               Join the auction, outbid your rivals, and write your club's name
               across the leaderboard.
             </Text>
-            <div className="relative flex flex-wrap justify-center gap-3 mt-9">
+            <div className="flex justify-center gap-3 mt-9">
               <Anchor to="/signup">
-                <Button size="md" className="rounded-xl">
+                <Button size="sm" className="rounded-xl text-[12px]">
                   Create account
                 </Button>
               </Anchor>
               <Anchor to="/login">
                 <Button
-                  size="md"
+                  size="sm"
                   variant="outline"
-                  className="rounded-xl border-fifa-border text-white bg-transparent hover:bg-fifa-surface"
+                  className="rounded-xl text-[12px] border-fifa-border text-white bg-transparent hover:bg-fifa-surface"
                 >
                   I already have one
                 </Button>
