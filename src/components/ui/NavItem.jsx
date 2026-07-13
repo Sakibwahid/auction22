@@ -16,19 +16,19 @@ export function NavItem({ label, link, Icon, onClick }) {
 
   if (isAction) {
     return (
-      <li>
+      <ol>
         <button type="button" className={className} onClick={onClick}>
           {content}
         </button>
-      </li>
+      </ol>
     );
   }
 
   return (
-    <li>
+    <ol type="">
       <Link to={link} className={className} onClick={onClick}>
         {content}
       </Link>
-    </li>
+    </ol>
   );
 }

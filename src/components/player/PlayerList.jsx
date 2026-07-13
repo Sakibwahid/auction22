@@ -50,17 +50,13 @@ const PlayerList = ({ players = [], onPlayerClick, loading, scrollRef }) => {
     <div className="relative w-full">
       {/* FIXED CENTER GLOW */}
       <div
-        className="
-          fixed
-          top-1/2 left-1/2
-          -translate-x-1/2 -translate-y-1/2
-          w-[600px] h-[600px]
-          bg-fifa-accent/10
-          rounded-full
-          blur-[140px]
-          pointer-events-none
-          z-0
-        "
+              className="
+        absolute top-0 left-0 w-full
+        grid grid-cols-1
+        lg:grid-cols-2
+        gap-x-5 gap-y-4
+        items-start
+      "
       />
 
       <div
@@ -77,6 +73,8 @@ const PlayerList = ({ players = [], onPlayerClick, loading, scrollRef }) => {
           return (
             <div
               key={virtualRow.key}
+              data-index={virtualRow.index}
+              ref={rowVirtualizer.measureElement}
               style={{
                 position: "absolute",
                 top: 0,
@@ -84,10 +82,10 @@ const PlayerList = ({ players = [], onPlayerClick, loading, scrollRef }) => {
                 width: "100%",
                 transform: `translateY(${virtualRow.start}px)`,
               }}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start p-0.5"
+              className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-4 items-start"
             >
               {rowPlayers.map((player) => (
-                <div key={player.ID} className="w-full min-w-0">
+                <div key={player.ID} className="w-full min-w-0 px-1">
                   <PlayerCardDemo player={player} onClick={onPlayerClick} />
                 </div>
               ))}

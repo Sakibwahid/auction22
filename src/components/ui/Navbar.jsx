@@ -65,7 +65,6 @@ export function Navbar() {
         z-50
         flex
         md:min-h-screen
-        md:w-24
         flex-row
         md:flex-col
         justify-between
@@ -83,16 +82,16 @@ export function Navbar() {
       {/* Logo */}
       <div
         onClick={() => navigate(homeLink)}
-        className="cursor-pointer flex md:flex-col items-center gap-2 md:gap-1"
+        className="cursor-pointer flex flex-row-reverse items-center gap-2 md:gap-1"
       >
         <div className="w-9 h-9 rounded-xl bg-fifa-card border border-fifa-accent/40 flex items-center justify-center">
           <Text className="font-[orbitron] text-fifa-accent text-xs">22</Text>
         </div>
         <Text
-          variant="subheading"
+          variant=""
           className="
             font-[orbitron]
-            text-[10px]
+            text-[13px]
             tracking-[0.25em]
             uppercase
             text-fifa-text-secondary
@@ -106,7 +105,7 @@ export function Navbar() {
 
       {/* Desktop Navigation */}
       <div className="hidden md:flex flex-col items-center gap-2">
-        <div className="flex flex-col items-center gap-2 p-1.5 rounded-2xl bg-fifa-card/50 border border-fifa-border/60">
+        <div className="flex flex-col items-center gap-2 p-1.5 rounded-2xl">
           <NavItem label="Home" link={homeLink} Icon={Home} />
           <NavItem label="Auction" link="/auction" Icon={Trophy} />
           {user && (

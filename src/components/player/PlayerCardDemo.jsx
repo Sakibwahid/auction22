@@ -8,8 +8,8 @@ const PlayerCardDemo = ({ player, onClick }) => {
     <div
       onClick={() => onClick?.(player)}
       className={`
-        w-full max-w-full
-        rounded-xl
+        w-full max-w-full 
+        rounded-xl mb-1 md:mb-2
         border border-fifa-accent/20
         bg-fifa-card
         overflow-hidden

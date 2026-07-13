@@ -43,11 +43,11 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Router>
-          <div className="flex flex-col md:flex-row md:justify-between min-h-screen bg-fifa-bg text-fifa-text">
-            <div>
+          <div className="flex flex-col md:flex-row md:h-screen md:overflow-hidden min-h-screen bg-fifa-bg text-fifa-text">
+            <div className="md:h-full">
               <Navbar></Navbar>
             </div>
-            <div className="flex-1 relative min-h-screen md:block flex justify-center items-center overflow-y-auto">
+            <div className="flex-1 relative min-h-screen md:min-h-0 md:h-full overflow-y-auto">
               <Suspense
                 fallback={
                   <div className="min-h-screen flex items-center justify-center bg-fifa-bg">
