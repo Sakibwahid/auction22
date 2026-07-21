@@ -2,32 +2,26 @@
 @import "tailwindcss";
 
 @theme {
-  /* primary */
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
-  --color-primary-900: #1e3a8a;
+   /* Brand */
+  --color-fifa-primary: #FF2D7A;
+  --color-fifa-secondary: #00B8FF;
+  --color-fifa-accent: #FF2D7A;
 
-  /* fifa */
+  /* Layout */
   --color-fifa-bg: #0B1020;
-  --color-fifa-surface: #111A2D;
-  --color-fifa-card: #17233B;
-  --color-fifa-elevated: #1D2B45;
-  --color-fifa-border: #2B3B5A;
+  --color-fifa-surface: #171B2E;
+  --color-fifa-card: #232942;
+  --color-fifa-border: #313857;
 
-  --color-fifa-accent: #B7FF2A;
-  --color-fifa-accent-hover: #D2FF57;
-  --color-fifa-accent-active: #95E600;
-
+  /* Text */
   --color-fifa-text: #FFFFFF;
-  --color-fifa-text-secondary: #A9B4C8;
-  --color-fifa-text-muted: #6F7D99;
+  --color-fifa-text-secondary: #C9D1E8;
+  --color-fifa-text-muted: #8A93B2;
 
-  --color-fifa-success: #4ADE80;
-  --color-fifa-warning: #FACC15;
-  --color-fifa-danger: #EF4444;
+  /* Status */
+  --color-fifa-success: #34D399;
+  --color-fifa-warning: #FFD54A;
+  --color-fifa-danger: #FF5C5C;
   --color-fifa-info: #38BDF8;
 
   /* fonts */

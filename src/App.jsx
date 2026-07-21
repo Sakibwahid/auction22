@@ -31,6 +31,7 @@ const PlayerTableAssign = lazy(() =>
 const DisplaySquad = lazy(() => import("./components/Squads/DisplaySquad"));
 const SquadBuilder = lazy(() => import("./components/Squads/SquadBuilder"));
 const About = lazy(() => import("./pages/About"));
+const Upload = lazy(() => import("./hooks/Upload"));
 
 const withRole = (role, Element) => (
   <ProtectedRoute role={role}>
@@ -59,6 +60,7 @@ function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
+                  <Route path="/upload" element={<Upload />} />
 
                   <Route path="/user" element={withRole(["user"], UserDashboard)} />
                   <Route
