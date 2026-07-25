@@ -1,11 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  doc,
-  getDoc,
-  onSnapshot,
-  collection,
-} from "firebase/firestore";
+import { onSnapshot, collection } from "firebase/firestore";
 
 import { db } from "../lib/firebase/config";
 import { useAuth } from "../context/AuthContext";
@@ -14,29 +9,31 @@ import { Anchor } from "../components/ui/Anchor";
 import { Text } from "../components/ui/Text";
 import Loadin from "../components/ui/loadin";
 
-import { Trophy, BarChart3, Users, Hammer, Crown,} from "lucide-react";
+import { Trophy, BarChart3, Users, Hammer, Crown } from "lucide-react";
 
-const TEAMS_CACHE_KEY = "teams_cache_v1";
+const STANDINGS_CACHE_KEY = "standings_cache_v1";
 const CACHE_MAX_AGE_MS = 1000 * 60 * 5;
+const DEFAULT_SEASON = "S3";
 
-const renameMap = {
-  City: "Manchester City F.C.",
-  ManU: "Manchester United F.C.",
-  Bayern: "FC Bayern Munich",
-  Liverpool: "Liverpool F.C.",
-  Wolves: "Wolverhampton Wanderers F.C.",
+const normalizeTeamName = (name) => {
+  if (!name) return name;
+  return name.replace(/\s+FC$/, " F.C.").replace(/\s+C\.F\.$/, " C.F.");
 };
 
-const shortMap = Object.fromEntries(
-  Object.entries(renameMap).map(([k, v]) => [v, k])
-);
+const sortStandings = (a, b) => {
+  if ((b.totalPoints || 0) !== (a.totalPoints || 0))
+    return (b.totalPoints || 0) - (a.totalPoints || 0);
+  if ((b.firstCount || 0) !== (a.firstCount || 0))
+    return (b.firstCount || 0) - (a.firstCount || 0);
+  return (b.secondCounts || 0) - (a.secondCounts || 0);
+};
 
 const UserDashboard = () => {
   const navigate = useNavigate();
   const { userData, loading: authLoading } = useAuth();
 
-  const [teams, setTeams] = useState([]);
-  const [initialLoad, setInitialLoad] = useState(true);
+  const [standings, setStandings] = useState([]);
+  const [ready, setReady] = useState(false);
 
   /* ---------------- AUTH GUARD ---------------- */
   useEffect(() => {
@@ -48,102 +45,63 @@ const UserDashboard = () => {
   /* ---------------- LOAD CACHE FIRST ---------------- */
   useEffect(() => {
     try {
-      const cached = localStorage.getItem(TEAMS_CACHE_KEY);
-
+      const cached = localStorage.getItem(STANDINGS_CACHE_KEY);
       if (cached) {
         const parsed = JSON.parse(cached);
-
-        if (
-          parsed?.data &&
-          Date.now() - parsed.savedAt < CACHE_MAX_AGE_MS
-        ) {
-          setTeams(parsed.data);
-          setInitialLoad(false);
+        if (parsed?.data && Date.now() - parsed.savedAt < CACHE_MAX_AGE_MS) {
+          setStandings(parsed.data);
+          setReady(true);
         }
       }
     } catch {
-      localStorage.removeItem(TEAMS_CACHE_KEY);
+      localStorage.removeItem(STANDINGS_CACHE_KEY);
     }
   }, []);
 
-  /* ---------------- REALTIME FIRESTORE ---------------- */
+  /* ---------------- REALTIME STANDINGS ---------------- */
   useEffect(() => {
     const unsubscribe = onSnapshot(
-      collection(db, "teams"),
-      async (snapshot) => {
-        try {
-          const resolvedTeams = await Promise.all(
-            snapshot.docs.map(async (docSnap) => {
-              let docId = docSnap.id;
-              let data = docSnap.data();
+      collection(db, "seasons", DEFAULT_SEASON, "standings"),
+      (snapshot) => {
+        const data = snapshot.docs
+          .map((doc) => ({
+            name: doc.id,
+            ...doc.data(),
+          }))
+          .sort(sortStandings);
 
-              if (renameMap[docId]) {
-                const fullName = renameMap[docId];
+        setStandings(data);
+        setReady(true);
 
-                const fullSnap = await getDoc(
-                  doc(db, "teams", fullName)
-                );
-
-                if (fullSnap.exists()) {
-                  docId = fullName;
-                  data = fullSnap.data();
-                }
-              }
-
-              return { name: docId, ...data };
-            })
-          );
-
-          resolvedTeams.sort((a, b) => {
-            if ((b.totalPoints || 0) !== (a.totalPoints || 0)) {
-              return b.totalPoints - a.totalPoints;
-            }
-
-            if ((b.firstCount || 0) !== (a.firstCount || 0)) {
-              return b.firstCount - a.firstCount;
-            }
-
-            return (b.secondCounts || 0) - (a.secondCounts || 0);
-          });
-
-          setTeams(resolvedTeams);
-
-          localStorage.setItem(
-            TEAMS_CACHE_KEY,
-            JSON.stringify({
-              data: resolvedTeams,
-              savedAt: Date.now(),
-            })
-          );
-
-          if (initialLoad) setInitialLoad(false);
-        } catch (err) {
-          console.error("Teams snapshot error:", err);
-        }
+        localStorage.setItem(
+          STANDINGS_CACHE_KEY,
+          JSON.stringify({
+            data,
+            savedAt: Date.now(),
+          })
+        );
       }
     );
 
     return () => unsubscribe();
-  }, [initialLoad]);
+  }, []);
 
   /* ---------------- DERIVED VALUES ---------------- */
-  const teamNameShort = useMemo(() => {
-    if (!userData) return "City";
-    return shortMap[userData.teamName] || "City";
-  }, [userData]);
+  const normalizedUserTeam = useMemo(() => normalizeTeamName(userData?.teamName), [userData]);
 
   const userRank = useMemo(() => {
-    return teams.findIndex((t) => t.name === teamNameShort) + 1;
-  }, [teams, teamNameShort]);
+    if (!normalizedUserTeam) return null;
+    const idx = standings.findIndex((t) => t.name === normalizedUserTeam);
+    return idx >= 0 ? idx + 1 : null;
+  }, [standings, normalizedUserTeam]);
 
   const userPoints = useMemo(() => {
-    return (
-      teams.find((t) => t.name === teamNameShort)?.totalPoints || 0
-    );
-  }, [teams, teamNameShort]);
+    if (!normalizedUserTeam) return 0;
+    return standings.find((t) => t.name === normalizedUserTeam)?.totalPoints || 0;
+  }, [standings, normalizedUserTeam]);
 
-  /* ---------------- LOADING LOGIC (FIXED) ---------------- */
-  if (authLoading || (!userData && initialLoad)) {
+  /* ---------------- LOADING LOGIC ---------------- */
+  if (authLoading || (!userData && !ready)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-fifa-bg">
         <Loadin>Loading dashboard...</Loadin>
@@ -162,11 +120,12 @@ const UserDashboard = () => {
   return (
     <div className="min-h-screen w-full text-white flex justify-center px-4 py-10 bg-fifa-bg relative overflow-hidden">
       <div className="pointer-events-none fixed -top-40 right-0 w-[420px] h-[420px] bg-fifa-accent/30 rounded-full blur-[120px]" />
-       
+
       <div className="relative w-full max-w-4xl space-y-6">
-            <Text variant="heading" className="text-center">
-              Welcome Back!
-            </Text>
+        <Text variant="heading" className="text-center">
+          Welcome Back!
+        </Text>
+
         {/* MANAGER CARD */}
         <div className="relative bg-fifa-card border border-fifa-border rounded-2xl p-6 md:p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-fifa-accent" />
@@ -207,7 +166,7 @@ const UserDashboard = () => {
                 <div className="flex items-center justify-center gap-1">
                   {userRank === 1 && <Crown size={16} className="text-fifa-warning" />}
                   <Text className="font-[rajdhani] font-semibold text-white text-2xl leading-none">
-                    #{userRank || "—"}
+                    #{userRank ?? "—"}
                   </Text>
                 </div>
                 <Text className="font-inter text-[10px] uppercase tracking-wider text-fifa-text-muted mt-1 block">
