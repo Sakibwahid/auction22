@@ -1,21 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import {
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp,
-  collection,
-  getDocs,
-  limit,
-  query,
-} from "firebase/firestore";
+import { collection, getDocs, limit, query } from "firebase/firestore";
 
 import { db } from "../../lib/firebase/config";
 import { useAuth } from "../../context/AuthContext";
 
 import { Text } from "../ui/Text";
 import { Button } from "../ui/Button";
-import { Search, Plus, X, Target, Save } from "lucide-react";
+import { Search, Plus, X, Target } from "lucide-react";
 
 const SQUAD_CACHE_KEY = "squad_builder_players";
 const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
@@ -59,17 +50,25 @@ const POSITION_ORDER = [
 
 const SquadBuilder = () => {
   const { user } = useAuth();
-  const [targets, setTargets] = useState([]);
   const [allPlayers, setAllPlayers] = useState([]);
   const [loadingPlayers, setLoadingPlayers] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [positionFilter, setPositionFilter] = useState("");
-  const [lastSaved, setLastSaved] = useState(null);
+
+  const storageKey = user?.uid ? `squad_targets_${user.uid}` : null;
+
+  const [targets, setTargets] = useState(() => {
+    if (!storageKey) return [];
+    try {
+      const cached = localStorage.getItem(storageKey);
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const [status, setStatus] = useState(null);
   const [viewMode, setViewMode] = useState("market");
-
-  const saveTimer = useRef(null);
 
   function PlayerPhoto({ playerId, name, size = "w-10 h-10" }) {
     const [failed, setFailed] = React.useState(false);
@@ -113,7 +112,7 @@ const SquadBuilder = () => {
 
       setLoadingPlayers(true);
       try {
-        const data = (await getDocs(query(collection(db, "players"), limit(500)))).docs.map((d) => ({
+        const data = (await getDocs(query(collection(db, "players"), limit(1000)))).docs.map((d) => ({
           id: d.id,
           ...d.data(),
           Overall: Number(d.data().Overall),
@@ -134,43 +133,23 @@ const SquadBuilder = () => {
     loadPlayers();
   }, []);
 
-  /* ---------------- LOAD USER TARGETS ---------------- */
-  useEffect(() => {
-    if (!user?.uid) return;
-    const ref = doc(db, "user_squads", user.uid);
-    getDoc(ref).then((snap) => {
-      if (snap.exists()) {
-        const data = snap.data();
-        setTargets(data.players || []);
-        setLastSaved(data.updatedAt);
-      }
-    });
-  }, [user?.uid]);
-
-  /* ---------------- PERSIST TARGETS (debounced) ---------------- */
+  /* ---------------- TARGETS (localStorage only) ---------------- */
   const persistTargets = (list) => {
-    if (!user?.uid) return;
-    setSaving(true);
-    setStatus(null);
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(async () => {
-      try {
-        const ref = doc(db, "user_squads", user.uid);
-        await setDoc(
-          ref,
-          { players: list, updatedAt: serverTimestamp() },
-          { merge: true }
-        );
-        setLastSaved(new Date());
-        setStatus({ type: "success", msg: "Squad saved" });
-      } catch (err) {
-        console.error(err);
-        setStatus({ type: "error", msg: "Save failed" });
-      } finally {
-        setSaving(false);
-      }
-    }, 600);
+    if (!storageKey) return;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(list));
+    } catch (err) {
+      console.error(err);
+    }
   };
+
+  useEffect(() => {
+    if (!storageKey) return;
+    try {
+      const cached = localStorage.getItem(storageKey);
+      if (cached) setTargets(JSON.parse(cached));
+    } catch {}
+  }, [storageKey]);
 
   const addTarget = (player) => {
     if (targets.find((t) => t.playerId === player.id)) {
@@ -270,11 +249,6 @@ const SquadBuilder = () => {
 
             <Text className="font-inter text-[11px] text-fifa-text-muted">
               {totalTargets} target{totalTargets === 1 ? "" : "s"}
-              {lastSaved && (
-                <span className="ml-2 text-fifa-text-muted/70">
-                  · Saved {lastSaved.toLocaleTimeString()}
-                </span>
-              )}
             </Text>
             {status && (
               <span
@@ -291,7 +265,7 @@ const SquadBuilder = () => {
               <Button
                 size="sm"
                 onClick={clearAll}
-                disabled={saving || !totalTargets}
+                disabled={!totalTargets}
                 className="rounded-xl border border-fifa-danger/30 bg-fifa-danger/10 text-fifa-danger hover:bg-fifa-danger/20 disabled:opacity-60"
               >
                 Clear All
