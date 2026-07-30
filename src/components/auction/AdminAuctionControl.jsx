@@ -87,7 +87,7 @@ const AdminAuctionControl = () => {
       const grouped = {};
 
       snapshot.docs.forEach((d) => {
-        const player = d.data();
+        const player = { ...d.data(), ID: d.id };
         const rating = Number(player.Overall ?? player.Rating ?? 0);
         if (rating < MIN_RATING) return;
         if (!grouped[player.Position]) grouped[player.Position] = [];
@@ -112,15 +112,24 @@ const AdminAuctionControl = () => {
         const ageMs = Date.now() - (parsed.savedAt ?? 0);
 
         if (ageMs > CACHE_MAX_AGE_MS) {
-          // Cache expired — fetch fresh
           localStorage.removeItem(STORAGE_KEY);
           fetchAllPlayers();
         } else {
-          // Cache valid — restore
-          if (parsed.availablePlayers)
-            setAvailablePlayers(parsed.availablePlayers);
-          if (parsed.selectedPosition)
-            setSelectedPosition(parsed.selectedPosition);
+          const playersWithId =
+            parsed.availablePlayers &&
+            Object.values(parsed.availablePlayers).every((arr) =>
+              Array.isArray(arr) ? arr.every((p) => p.ID) : false
+            );
+
+          if (!playersWithId) {
+            localStorage.removeItem(STORAGE_KEY);
+            fetchAllPlayers();
+          } else {
+            if (parsed.availablePlayers)
+              setAvailablePlayers(parsed.availablePlayers);
+            if (parsed.selectedPosition)
+              setSelectedPosition(parsed.selectedPosition);
+          }
         }
       } else {
         fetchAllPlayers();
@@ -213,6 +222,11 @@ const AdminAuctionControl = () => {
 
   const handleSell = () => {
     if (!currentPlayer || !selectedTeam || !prices[selectedTeam]) return;
+    if (!currentPlayer.ID) {
+      console.error("handleSell abort: currentPlayer is missing ID", currentPlayer);
+      alert("Player ID missing. Please choose a new player and try again.");
+      return;
+    }
 
     const playerId = currentPlayer.ID;
     const price = Number(prices[selectedTeam]);
@@ -393,7 +407,14 @@ const AdminAuctionControl = () => {
               return (
                 <button
                   key={team.id}
-                  onClick={() => setSelectedTeam(isSelected ? null : team.id)}
+                  onClick={() => {
+                    setSelectedTeam(isSelected ? null : team.id)
+                    console.log(`Selected team: ${isSelected ? "none" : team.name}`);
+
+                  }
+                    
+                  }
+                  
                   className={`
                     w-full flex items-center gap-3
                     px-3 sm:px-4 py-3
