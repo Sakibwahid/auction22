@@ -53,7 +53,7 @@ const PlayerFilter = () => {
       setLoading(true);
 
       try {
-        const q = query(collection(db, "players"), limit(500));
+        const q = query(collection(db, "players"), limit(1000));
         const snapshot = await getDocs(q);
 
         const data = snapshot.docs.map((doc) => ({
