@@ -34,7 +34,7 @@ const TEAMS = [
   { id: "wolves01", name: "Wolves", color: "#FDB913" },
   { id: "bayern05", name: "Bayern Munich", color: "#DC052D" },
   { id: "city04", name: "Manchester City", color: "#6CABDD" },
-  { id: "united03", name: "Manchester United", color: "#DA291C" },
+  { id: "paris03", name: "Paris Saint-Germain", color: "#DA291C" },
   { id: "liverpool01", name: "Liverpool", color: "#C8102E" },
 ];
 
