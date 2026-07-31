@@ -9,6 +9,7 @@ import {
   onSnapshot,
   query,
   limit,
+  orderBy,
 } from "firebase/firestore";
 import { db } from "../../lib/firebase/config";
 import { useNavigate } from "react-router-dom";
@@ -32,14 +33,14 @@ const POSITIONS = [
 
 const TEAMS = [
   { id: "wolves01", name: "Wolves", color: "#FDB913" },
-  { id: "bayern05", name: "Bayern Munich", color: "#DC052D" },
+  { id: "bayern05", name: "Bayern Munich", color: "#FFFFFF" },
   { id: "city04", name: "Manchester City", color: "#6CABDD" },
-  { id: "paris03", name: "Paris Saint-Germain", color: "#DA291C" },
+  { id: "paris03", name: "Paris Saint-Germain", color: "#f507da" },
   { id: "liverpool01", name: "Liverpool", color: "#C8102E" },
 ];
 
 const STORAGE_KEY = "auction_state_v3";
-const MIN_RATING = 83;
+const MIN_RATING = 80;
 const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 const AdminAuctionControl = () => {
@@ -54,6 +55,7 @@ const AdminAuctionControl = () => {
   const [prices, setPrices] = useState({});
   const [seasonId, setSeasonId] = useState("S3");
   const [soldFlash, setSoldFlash] = useState(null);
+  const [recentSold, setRecentSold] = useState([]);
 
   // Keep ref to unsubscribe the live listener on unmount
   const unsubRef = useRef(null);
@@ -75,6 +77,29 @@ const AdminAuctionControl = () => {
     );
     return () => unsubRef.current?.();
   }, []);
+
+  /* ─────────────────────────────────────────
+     LIVE LISTENER — recent sold players
+  ───────────────────────────────────────── */
+  useEffect(() => {
+    const q = query(collection(db, "players"), orderBy("updatedAt", "desc"), limit(50));
+    const unsubSold = onSnapshot(
+      q,
+      (snap) => {
+        const sold = snap.docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .filter((p) => p.currentTeamId && p.currentSeasonId === seasonId && p.soldPrice > 0)
+          .sort((a, b) => {
+            const ta = a.updatedAt?.toMillis?.() || 0;
+            const tb = b.updatedAt?.toMillis?.() || 0;
+            return tb - ta;
+          });
+        setRecentSold(sold);
+      },
+      (err) => console.error("recent sold listener error:", err),
+    );
+    return () => unsubSold();
+  }, [seasonId]);
 
   /* ─────────────────────────────────────────
      FETCH ALL PLAYERS (once, with cache)
@@ -482,19 +507,49 @@ const AdminAuctionControl = () => {
           <div className="flex items-center gap-2 mb-4 shrink-0">
             <span className="w-1.5 h-5 rounded-full bg-white/30 inline-block" />
             <span className="text-xs font-semibold uppercase tracking-widest text-white">
-              More Features
+              Recent Sold
             </span>
           </div>
 
-          <div className="flex-1 flex items-center justify-center py-10">
-            <div className="text-center space-y-2">
-              <div className="w-10 h-10 mx-auto rounded-full border border-dashed border-white/15 flex items-center justify-center">
-                <span className="text-white/20 text-lg">+</span>
+          <div className="h-[520px] overflow-y-auto pr-1 space-y-2">
+            {recentSold.length === 0 ? (
+              <div className="text-center py-10 text-white/20 text-xs uppercase tracking-widest">
+                No players sold yet
               </div>
-              <span className="block text-xs text-white/20 uppercase tracking-widest">
-                Coming soon
-              </span>
-            </div>
+            ) : (
+              recentSold.map((player) => {
+                const team = TEAMS.find((t) => t.id === player.currentTeamId);
+                return (
+                  <div
+                    key={player.id}
+                    className="flex items-center gap-3 bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2.5"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-white truncate">
+                        {player.Name || player.name}
+                      </div>
+                      <div className="text-[10px] text-white/40 uppercase tracking-wider">
+                        {player.Position}
+                      </div>
+                    </div>
+                    {team && (
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: team.color }}
+                        />
+                        <span className="text-[11px] text-white/70">
+                          {team.name}
+                        </span>
+                      </div>
+                    )}
+                    <div className="text-sm font-semibold text-fifa-accent shrink-0">
+                      {player.soldPrice}M
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
