@@ -104,14 +104,13 @@ const DisplaySquad = () => {
   const navigate = useNavigate();
   const { userData } = useAuth();
 
+  const userTeamId = userData?.teamId || null;
   const [players, setPlayers] = useState([]);
   const [seasonId, setSeasonId] = useState("S3");
-  const [selectedTeamId, setSelectedTeamId] = useState(null);
+  const [selectedTeamId, setSelectedTeamId] = useState(userTeamId || null);
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState("list");
-
-  const userTeamId = userData?.teamId || null;
-
+  
   useEffect(() => {
     if (userTeamId && !selectedTeamId) {
       setSelectedTeamId(userTeamId);
@@ -273,9 +272,7 @@ const DisplaySquad = () => {
                 onChange={(e) => setSelectedTeamId(e.target.value)}
                 className="bg-fifa-surface border border-fifa-border text-white text-sm rounded-xl px-3 py-2 outline-none focus:border-fifa-accent transition"
               >
-                <option value="" disabled>
-                  Select Team
-                </option>
+                
                 {userTeamId && (
                   <option value={userTeamId}>Your Squad</option>
                 )}
