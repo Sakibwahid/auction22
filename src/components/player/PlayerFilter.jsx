@@ -15,10 +15,11 @@ const CATEGORIES = [
 
 const OVERALLS = ["95", "85", "80"];
 
-const PLAYER_CACHE_KEY = "player_filter_cache";
-const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
-
-const PlayerFilter = () => {
+const PlayerFilter = ({
+  collectionName = "players",
+  cacheKey = "player_filter_cache",
+}) => {
+  const PLAYER_CACHE_KEY = cacheKey;
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -53,7 +54,7 @@ const PlayerFilter = () => {
       setLoading(true);
 
       try {
-        const q = query(collection(db, "players"), limit(1000));
+        const q = query(collection(db, collectionName), limit(1000));
         const snapshot = await getDocs(q);
 
         const data = snapshot.docs.map((doc) => ({
