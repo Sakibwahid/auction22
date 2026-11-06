@@ -106,7 +106,7 @@ const DisplaySquad = () => {
 
   const userTeamId = userData?.teamId || null;
   const [players, setPlayers] = useState([]);
-  const [seasonId, setSeasonId] = useState("S3");
+  const [seasonId, setSeasonId] = useState("S4");
   const [selectedTeamId, setSelectedTeamId] = useState(userTeamId || null);
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState("list");
