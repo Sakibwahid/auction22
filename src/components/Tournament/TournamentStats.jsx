@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 import { db } from "../../lib/firebase/config";
 import { Text } from "../ui/Text";
+import { Button } from "../ui/Button";
 import Loadin from "../ui/loadin";
 import Reveal from "../ui/Reveal";
 import CountUp from "../ui/CountUp";
@@ -66,6 +68,7 @@ function ClubLogo({ name, size = "w-11 h-11" }) {
 }
 
 const TournamentStats = ({ selectedSeason = "S3" }) => {
+  const navigate = useNavigate();
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -198,12 +201,22 @@ const TournamentStats = ({ selectedSeason = "S3" }) => {
             League Table · {selectedSeason}
           </Text>
         </div>
-        <Text
-          variant="heading"
-          className="font-[orbitron] text-white text-3xl md:text-5xl mt-3"
-        >
-          Tournament Standings
-        </Text>
+        <div className="flex items-center justify-between mt-3">
+          <Text
+            variant="heading"
+            className="font-[orbitron] text-white text-3xl md:text-5xl"
+          >
+            Tournament Standings
+          </Text>
+          <Button
+            size="md"
+            onClick={() =>
+              navigate(`/tournamentresults?season=${selectedSeason}`)
+            }
+          >
+            View Tournament Results →
+          </Button>
+        </div>
       </Reveal>
 
       {/* SUMMARY — full-width horizontal cards */}

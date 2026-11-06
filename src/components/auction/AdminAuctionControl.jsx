@@ -43,6 +43,16 @@ const STORAGE_KEY = "auction_state_v3";
 const MIN_RATING = 80;
 const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
 
+const getBasePrice = (rating) => {
+  const r = Number(rating);
+  if (r >= 90) return 85;
+  if (r >= 87) return 70;
+  if (r >= 85) return 60;
+  if (r >= 83) return 50;
+  if (r >= 81) return 40;
+  return 30;
+};
+
 const AdminAuctionControl = () => {
   const navigate = useNavigate();
 
@@ -53,7 +63,7 @@ const AdminAuctionControl = () => {
 
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [prices, setPrices] = useState({});
-  const [seasonId, setSeasonId] = useState("S3");
+  const [seasonId, setSeasonId] = useState("S4");
   const [soldFlash, setSoldFlash] = useState(null);
   const [recentSold, setRecentSold] = useState([]);
 
@@ -403,6 +413,26 @@ const AdminAuctionControl = () => {
               {currentPlayer ? (
                 <div className="w-full max-w-full">
                   <PlayerCardDemo player={currentPlayer} />
+                  <div className="mt-3 rounded-xl border border-white/10 bg-white/5 p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-white/40 uppercase tracking-widest">
+                        Base Price
+                      </span>
+                      <Text
+                        variant="heading"
+                        className="text-xl font-semibold text-fifa-accent"
+                      >
+                        {getBasePrice(
+                          currentPlayer.Overall ?? currentPlayer.Rating,
+                        )}M
+                      </Text>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] text-white/30">
+                        Overall {currentPlayer.Overall ?? currentPlayer.Rating}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="w-full flex items-center justify-center h-36 rounded-xl border border-dashed border-white/10">

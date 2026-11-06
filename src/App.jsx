@@ -25,6 +25,9 @@ const UpdateTournament = lazy(() =>
 const TournamentStats = lazy(() =>
   import("./components/Tournament/TournamentStats")
 );
+const TournamentResults = lazy(() =>
+  import("./components/Tournament/TournamentResults")
+);
 const PlayerTableAssign = lazy(() =>
   import("./components/Squads/PlayerTableAssign")
 );
@@ -93,6 +96,10 @@ function App() {
                   <Route
                     path="/tournamentstats"
                     element={withRole(["user", "admin"], TournamentStats)}
+                  />
+                  <Route
+                    path="/tournamentresults"
+                    element={withRole(["user", "admin"], TournamentResults)}
                   />
                   <Route
                     path="/user/squad"
